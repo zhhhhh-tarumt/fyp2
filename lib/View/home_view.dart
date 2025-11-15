@@ -52,7 +52,7 @@ class HomeView extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    quickAction(Icons.add, "Add", "/addExpense", context),
+                    quickAction(Icons.add, "Add", "/reloadMoney", context),
                     quickAction(Icons.swap_horiz, "Transfer", "/transfer", context),
                     quickAction(Icons.qr_code, "Scan", "/merchantScan", context),
                   ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fyp2/View/reload_money_view.dart';
 
 // AUTH
 import 'View/login_view.dart';
@@ -104,6 +105,7 @@ class MyApp extends StatelessWidget {
         // -----------------------------------
         // MONEY RELATED
         // -----------------------------------
+        "/reloadMoney": (context) => const ReloadMoneyView(),
         "/transfer": (context) => TransferMoneyView(),
         "/receive": (context) => const ReceiveMoneyView(),
         "/quickExpense": (context) => ExpenseInputSimpleView(),

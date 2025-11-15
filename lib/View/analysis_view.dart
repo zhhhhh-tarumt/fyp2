@@ -1,8 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-class AnalysisPage extends StatelessWidget {
-  const AnalysisPage({super.key});
+class AnalysisView extends StatelessWidget {
+  const AnalysisView({super.key});
 
   @override
   Widget build(BuildContext context) {
