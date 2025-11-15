@@ -53,7 +53,7 @@ class HomeView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     quickAction(Icons.add, "Add", "/reloadMoney", context),
-                    quickAction(Icons.swap_horiz, "Transfer", "/transfer", context),
+                    quickAction(Icons.swap_horiz, "Transfer", "/transferContact", context),
                     quickAction(Icons.qr_code, "Scan", "/merchantScan", context),
                   ],
                 ),
@@ -102,7 +102,7 @@ class HomeView extends StatelessWidget {
             context,
             title: "Transfer Money",
             icon: Icons.swap_horiz,
-            route: "/transfer",
+            route: "/transferContact",
           ),
           shortcutCard(
             context,
