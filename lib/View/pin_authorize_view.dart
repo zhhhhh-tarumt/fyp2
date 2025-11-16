@@ -9,153 +9,197 @@ class PinAuthorizeView extends StatefulWidget {
 }
 
 class _PinAuthorizeViewState extends State<PinAuthorizeView> {
+  final List<FocusNode> focusNodes = List.generate(6, (_) => FocusNode());
   final List<TextEditingController> controllers =
       List.generate(6, (_) => TextEditingController());
 
-  int timer = 60;
-  Timer? countdownTimer;
-  bool canResend = false;
+  int timerSeconds = 60;
+  late Timer timer;
 
   @override
   void initState() {
     super.initState();
     startTimer();
+
+    // auto focus first field
+    Future.delayed(const Duration(milliseconds: 300), () {
+      focusNodes[0].requestFocus();
+    });
   }
 
   void startTimer() {
-    timer = 60;
-    canResend = false;
-    countdownTimer?.cancel();
-    countdownTimer =
-        Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      if (timer == 0) {
-        setState(() {
-          canResend = true;
-          t.cancel();
-        });
+    timerSeconds = 60;
+    timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (timerSeconds == 0) {
+        t.cancel();
       } else {
-        setState(() {
-          timer--;
-        });
+        setState(() => timerSeconds--);
       }
     });
   }
 
-  String getPin() => controllers.map((c) => c.text).join();
-
-  @override
-  void dispose() {
-    for (var c in controllers) {
-      c.dispose();
+  void onChanged(String value, int index) {
+    if (value.isNotEmpty && index < 5) {
+      focusNodes[index + 1].requestFocus();
     }
-    countdownTimer?.cancel();
-    super.dispose();
+
+    if (index == 5 && value.isNotEmpty) {
+      verifyOTP();
+    }
+  }
+
+  void verifyOTP() {
+    final code = controllers.map((c) => c.text).join();
+    if (code.length == 6) {
+      Navigator.pushReplacementNamed(context, "/nav");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final method = ModalRoute.of(context)!.settings.arguments as String?;
     final green = Colors.green.shade800;
 
     return Scaffold(
+      backgroundColor: Colors.green.shade50,
+
       appBar: AppBar(
-        title: const Text("Verify PIN"),
+        backgroundColor: Colors.green.shade50,
+        elevation: 0,
+        iconTheme: IconThemeData(color: green),
+        centerTitle: true,
+        title: Text(
+          "Verify PIN",
+          style: TextStyle(
+            color: green,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
+
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 26),
         child: Column(
           children: [
-            Text(
-              method == "phone"
-                  ? "A 6-digit PIN has been sent to your phone number."
-                  : "A 6-digit PIN has been sent to your Gmail.",
-              style: const TextStyle(fontSize: 15),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 24),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(6, (index) {
-                return SizedBox(
-                  width: 45,
-                  child: TextField(
-                    controller: controllers[index],
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    maxLength: 1,
-                    obscureText: true,
-                    style: const TextStyle(fontSize: 22),
-                    decoration: InputDecoration(
-                      counterText: "",
-                      filled: true,
-                      fillColor: Colors.green.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            BorderSide(color: Colors.green.shade200),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            BorderSide(color: green, width: 1.5),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      if (value.isNotEmpty && index < 5) {
-                        FocusScope.of(context).nextFocus();
-                      } else if (value.isEmpty && index > 0) {
-                        FocusScope.of(context).previousFocus();
-                      }
-                    },
-                  ),
-                );
-              }),
-            ),
-
-            const SizedBox(height: 16),
+            const SizedBox(height: 40),
 
             Text(
-              canResend
-                  ? "Didn't receive the PIN?"
-                  : "Resend available in $timer seconds",
-            ),
-
-            TextButton(
-              onPressed: canResend
-                  ? () {
-                      startTimer();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("PIN resent!")),
-                      );
-                    }
-                  : null,
-              child: Text(
-                "Resend PIN",
-                style: TextStyle(
-                  color: canResend ? green : Colors.grey,
-                ),
+              "Enter the 6-digit code",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: green,
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
 
-            ElevatedButton(
-              onPressed: () {
-                final pin = getPin();
-                if (pin.length != 6) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("PIN must be 6 digits.")),
-                  );
-                  return;
-                }
-                Navigator.pushReplacementNamed(context, "/nav");
-              },
-              child: const Text("Verify"),
+            Text(
+              "We have sent a verification code to your phone/email.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.green.shade900.withOpacity(0.6),
+              ),
             ),
+
+            const SizedBox(height: 40),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(6, (i) {
+                return _otpBox(i, green);
+              }),
+            ),
+
+            const SizedBox(height: 25),
+
+            timerSeconds > 0
+                ? Text(
+                    "Resend code in $timerSeconds seconds",
+                    style: TextStyle(
+                      color: Colors.green.shade800.withOpacity(0.6),
+                    ),
+                  )
+                : GestureDetector(
+                    onTap: () {
+                      startTimer();
+                      for (var c in controllers) c.clear();
+                      focusNodes[0].requestFocus();
+                    },
+                    child: Text(
+                      "Resend Code",
+                      style: TextStyle(
+                        color: green,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+
+            const SizedBox(height: 50),
+
+            // MANUAL VERIFY BUTTON
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: verifyOTP,
+                child: const Text(
+                  "Verify",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            )
           ],
+        ),
+      ),
+    );
+  }
+
+  // OTP BOX
+  Widget _otpBox(int index, Color green) {
+    return Container(
+      height: 58,
+      width: 48,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200, width: 1.3),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 6,
+            color: Colors.green.shade100.withOpacity(0.4),
+            offset: const Offset(0, 3),
+          )
+        ],
+      ),
+      child: Center(
+        child: TextField(
+          controller: controllers[index],
+          focusNode: focusNodes[index],
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          maxLength: 1,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: green,
+          ),
+          decoration: const InputDecoration(
+            counterText: "",
+            border: InputBorder.none,
+          ),
+          onChanged: (value) => onChanged(value, index),
         ),
       ),
     );

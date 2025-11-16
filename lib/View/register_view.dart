@@ -1,122 +1,261 @@
 import 'package:flutter/material.dart';
 
-class RegisterView extends StatelessWidget {
-  RegisterView({super.key});
+class RegisterView extends StatefulWidget {
+  const RegisterView({super.key});
 
-  final contact = TextEditingController();
+  @override
+  State<RegisterView> createState() => _RegisterViewState();
+}
 
-  bool isPhone(String input) {
+class _RegisterViewState extends State<RegisterView> {
+  final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool isPasswordVisible = false;
+
+  bool isPhoneValid(String input) {
     return RegExp(r'^[0-9]{9,12}$').hasMatch(input);
-  }
-
-  bool isEmail(String input) {
-    return input.contains("@") && input.contains(".");
   }
 
   @override
   Widget build(BuildContext context) {
-    final greenDark = Colors.green.shade900;
+    final green = Colors.green.shade800;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Create an Account"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 10),
+      backgroundColor: Colors.green.shade50,
 
-            Text(
-              "Register with Gmail or Phone Number",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: greenDark,
-              ),
-            ),
-
-            const SizedBox(height: 18),
-
-            TextField(
-              controller: contact,
-              decoration: const InputDecoration(
-                labelText: "Email or Phone Number",
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            ElevatedButton(
-              onPressed: () {
-                final input = contact.text.trim();
-
-                if (input.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content:
-                            Text("Please enter email or phone number.")),
-                  );
-                  return;
-                }
-
-                String method = "";
-                if (isPhone(input)) {
-                  method = "phone";
-                } else if (isEmail(input)) {
-                  method = "gmail";
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Invalid email or phone number.")),
-                  );
-                  return;
-                }
-
-                Navigator.pushNamed(
-                  context,
-                  "/pinAuthorize",
-                  arguments: method,
-                );
-              },
-              child: const Text("Continue"),
-            ),
-
-            const SizedBox(height: 30),
-
-            Row(
-              children: [
-                Expanded(child: Divider(color: Colors.grey.shade300)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text("OR"),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-                Expanded(child: Divider(color: Colors.grey.shade300)),
-              ],
-            ),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 90),   // SHIFT CONTENT DOWN
 
-            const SizedBox(height: 18),
+                        // TITLE
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Welcome!",
+                            style: TextStyle(
+                              fontSize: 32,
+                              color: green,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Start your journey today.",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.green.shade900.withOpacity(0.6),
+                            ),
+                          ),
+                        ),
 
-            OutlinedButton.icon(
-              onPressed: () =>
-                  Navigator.pushReplacementNamed(context, "/login"),
-              icon: const Icon(Icons.apple, size: 26, color: Colors.black),
-              label: const Text("Continue with Apple"),
-            ),
+                        const SizedBox(height: 55),
 
-            const SizedBox(height: 10),
+                        // PHONE INPUT
+                        _roundedInput(
+                          controller: phoneController,
+                          hint: "Enter your phone number",
+                          icon: Icons.phone_android_outlined,
+                        ),
 
-            OutlinedButton.icon(
-              onPressed: () =>
-                  Navigator.pushReplacementNamed(context, "/login"),
-              icon: const Icon(Icons.facebook, color: Colors.blue),
-              label: const Text("Continue with Facebook"),
-            ),
-          ],
+                        const SizedBox(height: 20),
+
+                        // PASSWORD INPUT
+                        _roundedInput(
+                          controller: passwordController,
+                          hint: "Enter your password",
+                          icon: Icons.lock_outline,
+                          isPassword: true,
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // CREATE ACCOUNT BUTTON (WHITE TEXT)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              padding: EdgeInsets.zero,
+                            ),
+                            onPressed: () {
+                              String input = phoneController.text.trim();
+
+                              if (!isPhoneValid(input)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text("Please enter a valid phone number."),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              Navigator.pushNamed(
+                                context,
+                                "/pinAuthorize",
+                                arguments: "phone",
+                              );
+                            },
+                            child: const Text(
+                              "Create Your Account",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white, // FIXED
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // DIVIDER
+                        Row(
+                          children: [
+                            Expanded(
+                                child: Container(height: 1, color: Colors.black26)),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: Text("or"),
+                            ),
+                            Expanded(
+                                child: Container(height: 1, color: Colors.black26)),
+                          ],
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        // SOCIAL ICONS
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _socialIconGoogle(),
+                            const SizedBox(width: 22),
+                            _socialIconFacebook(),
+                            const SizedBox(width: 22),
+                            _socialIconApple(),
+                          ],
+                        ),
+
+                        const SizedBox(height: 45),
+
+                        // SIGN IN LINK
+                        GestureDetector(
+                          onTap: () =>
+                              Navigator.pushReplacementNamed(context, "/login"),
+                          child: RichText(
+                            text: TextSpan(
+                              text: "Already have an account? ",
+                              style: const TextStyle(color: Colors.black),
+                              children: [
+                                TextSpan(
+                                  text: "Sign in.",
+                                  style: TextStyle(
+                                    color: green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 50),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  // -----------------------------------------------------------
+  // BEAUTIFUL ROUNDED INPUT FIELD
+  // -----------------------------------------------------------
+  Widget _roundedInput({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+  }) {
+    final green = Colors.green.shade800;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.green.shade200, width: 1.3),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: green),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              obscureText: isPassword && !isPasswordVisible,
+              decoration: InputDecoration(
+                hintText: hint,
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          if (isPassword)
+            IconButton(
+              icon: Icon(
+                isPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: green,
+              ),
+              onPressed: () =>
+                  setState(() => isPasswordVisible = !isPasswordVisible),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // -----------------------------------------------------------
+  // SOCIAL ICON BUTTONS
+  // -----------------------------------------------------------
+  Widget _socialIconGoogle() => _circleIcon(Icons.g_mobiledata, Colors.red);
+  Widget _socialIconFacebook() => _circleIcon(Icons.facebook, Colors.blue);
+  Widget _socialIconApple() => _circleIcon(Icons.apple, Colors.black);
+
+  Widget _circleIcon(IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.black26),
+      ),
+      child: Icon(icon, size: 32, color: color),
     );
   }
 }

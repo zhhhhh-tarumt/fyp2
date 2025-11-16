@@ -13,12 +13,12 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Correct Firebase versions for Flutter 3.7.x
+  # Firebase compatibility for Flutter 3.7.x
   firebase_core: ^3.15.2
   firebase_auth: ^5.3.3
   cloud_firestore: ^5.4.3
 
-  # Charts library
+  # Charts
   fl_chart: ^0.65.0
 
 dev_dependencies:
@@ -29,3 +29,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  assets:
+    - assets/images/kangaroo.png

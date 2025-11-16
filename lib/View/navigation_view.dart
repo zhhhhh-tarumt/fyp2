@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'expense_home_view.dart';
 import 'home_view.dart';
 import 'analysis_view.dart';
-import 'add_expense_shortcut_view.dart';
 import 'ai_insight_view.dart';
 import 'settings_view.dart';
 

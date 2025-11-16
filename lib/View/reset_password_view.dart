@@ -8,16 +8,14 @@ class ResetPasswordView extends StatefulWidget {
 }
 
 class _ResetPasswordViewState extends State<ResetPasswordView> {
-  final emailController = TextEditingController();
+  final contactController = TextEditingController();
 
-  bool sent = false;
+  bool isEmail(String input) {
+    return input.contains("@") && input.contains(".");
+  }
 
-  void sendReset() {
-    setState(() => sent = true);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Reset link has been sent!")),
-    );
+  bool isPhone(String input) {
+    return RegExp(r'^[0-9]{9,12}$').hasMatch(input);
   }
 
   @override
@@ -25,62 +23,156 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
     final green = Colors.green.shade800;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.green.shade50,
+
       appBar: AppBar(
-        title: const Text("Reset Password"),
+        elevation: 0,
+        backgroundColor: Colors.green.shade50,
+        iconTheme: IconThemeData(color: green),
+        centerTitle: true,
+        title: Text(
+          "Reset Password",
+          style: TextStyle(color: green, fontWeight: FontWeight.w700),
+        ),
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 26),
+          child: Column(
+            children: [
+              const SizedBox(height: 70),
 
-            Text(
-              "Forgot Password?",
-              style: TextStyle(
-                color: green,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+              // TITLE
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Forgot Password?",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    color: green,
+                  ),
+                ),
               ),
-            ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 6),
 
-            const Text(
-              "Enter your email and we'll send you a password reset link.",
-              style: TextStyle(fontSize: 15),
-            ),
-
-            const SizedBox(height: 30),
-
-            // EMAIL INPUT
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: "Email",
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Enter your email or phone number to receive a reset code.",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.green.shade900.withOpacity(0.6),
+                  ),
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 50),
 
-            ElevatedButton(
-              onPressed: sendReset,
-              child: const Text("Send Reset Link"),
-            ),
+              // INPUT FIELD
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: Colors.green.shade200, width: 1.3),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline, color: green),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: contactController,
+                        decoration: const InputDecoration(
+                          hintText: "Email or Phone Number",
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
-            if (sent) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
+
+              // SEND RESET BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () {
+                    String input = contactController.text.trim();
+
+                    if (input.isEmpty ||
+                        (!isEmail(input) && !isPhone(input))) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                "Please enter a valid email or phone number.")),
+                      );
+                      return;
+                    }
+
+                    Navigator.pushNamed(context, "/pinAuthorize",
+                        arguments: isPhone(input) ? "phone" : "gmail");
+                  },
+                  child: const Text(
+                    "Send Reset Code",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 45),
+
+              // DIVIDER
               Row(
                 children: [
-                  Icon(Icons.check_circle, color: green),
-                  const SizedBox(width: 10),
-                  const Text("Check your email inbox."),
+                  Expanded(
+                      child: Container(height: 1, color: Colors.black26)),
+                  const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Text("or")),
+                  Expanded(
+                      child: Container(height: 1, color: Colors.black26)),
                 ],
-              )
-            ]
-          ],
+              ),
+
+              const SizedBox(height: 25),
+
+              // BACK TO LOGIN
+              GestureDetector(
+                onTap: () => Navigator.pushReplacementNamed(context, "/login"),
+                child: RichText(
+                  text: TextSpan(
+                    text: "Remember your password? ",
+                    style: const TextStyle(color: Colors.black),
+                    children: [
+                      TextSpan(
+                        text: "Login.",
+                        style: TextStyle(
+                            color: green, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

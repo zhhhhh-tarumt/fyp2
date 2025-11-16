@@ -14,79 +14,106 @@ class SettingsView extends StatelessWidget {
         title: const Text("Settings"),
         centerTitle: true,
       ),
+
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         children: [
+
+          // -----------------------------
+          // ACCOUNT SECTION
+          // -----------------------------
           sectionTitle("Account", green),
-
-          settingsItem(
-            icon: Icons.person,
-            title: "Profile",
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfileView()),
-            ),
+          settingsCard(
+            children: [
+              settingsItem(
+                icon: Icons.person_outline,
+                title: "Profile",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileView()),
+                ),
+              ),
+              divider(),
+              settingsItem(
+                icon: Icons.lock_reset,
+                title: "Reset Password",
+                onTap: () => Navigator.pushNamed(context, "/resetPassword"),
+              ),
+              divider(),
+              settingsItem(
+                icon: Icons.pin_outlined,
+                title: "Change PIN",
+                onTap: () => Navigator.pushNamed(context, "/pinAuthorize"),
+              ),
+            ],
           ),
 
-          settingsItem(
-            icon: Icons.lock_open_rounded,
-            title: "Reset Password",
-            onTap: () => Navigator.pushNamed(context, "/resetPassword"),
-          ),
+          const SizedBox(height: 30),
 
-          settingsItem(
-            icon: Icons.password,
-            title: "Change PIN",
-            onTap: () => Navigator.pushNamed(context, "/pinAuthorize"),
-          ),
-
-          const Divider(height: 40),
-
+          // -----------------------------
+          // GENERAL SECTION
+          // -----------------------------
           sectionTitle("General", green),
-
-          settingsItem(
-            icon: Icons.notifications,
-            title: "Notifications",
-            onTap: () => Navigator.pushNamed(context, "/notifications"),
+          settingsCard(
+            children: [
+              // 🔔 CHANGED HERE → Alarm Page
+              settingsItem(
+                icon: Icons.notifications_active_outlined,
+                title: "Alarm Settings",
+                onTap: () => Navigator.pushNamed(context, "/alarm"),
+              ),
+              divider(),
+              settingsItem(
+                icon: Icons.language_outlined,
+                title: "Language",
+                trailing: Text(
+                  "English",
+                  style: TextStyle(color: Colors.grey.shade700),
+                ),
+                onTap: () => Navigator.pushNamed(context, "/language"),
+              ),
+              divider(),
+              settingsItem(
+                icon: Icons.dark_mode_outlined,
+                title: "Appearance",
+                onTap: () => Navigator.pushNamed(context, "/appearance"),
+              ),
+            ],
           ),
 
-          settingsItem(
-            icon: Icons.language,
-            title: "Language",
-            trailing: Text("English", style: TextStyle(color: Colors.grey.shade600)),
-            onTap: () => Navigator.pushNamed(context, "/language"),
-          ),
+          const SizedBox(height: 30),
 
-          settingsItem(
-            icon: Icons.dark_mode_outlined,
-            title: "Appearance",
-            onTap: () => Navigator.pushNamed(context, "/appearance"),
-          ),
-
-          const Divider(height: 40),
-
+          // -----------------------------
+          // HELP & SUPPORT SECTION
+          // -----------------------------
           sectionTitle("Help & Support", green),
-
-          settingsItem(
-            icon: Icons.help_center,
-            title: "FAQ",
-            onTap: () => Navigator.pushNamed(context, "/faq"),
+          settingsCard(
+            children: [
+              settingsItem(
+                icon: Icons.help_outline,
+                title: "FAQ",
+                onTap: () => Navigator.pushNamed(context, "/faq"),
+              ),
+              divider(),
+              settingsItem(
+                icon: Icons.support_agent_outlined,
+                title: "Contact Support",
+                onTap: () => Navigator.pushNamed(context, "/support"),
+              ),
+              divider(),
+              settingsItem(
+                icon: Icons.info_outline,
+                title: "About App",
+                onTap: () => Navigator.pushNamed(context, "/about"),
+              ),
+            ],
           ),
 
-          settingsItem(
-            icon: Icons.support_agent,
-            title: "Contact Support",
-            onTap: () => Navigator.pushNamed(context, "/support"),
-          ),
+          const SizedBox(height: 40),
 
-          settingsItem(
-            icon: Icons.info_outline,
-            title: "About App",
-            onTap: () => Navigator.pushNamed(context, "/about"),
-          ),
-
-          const Divider(height: 40),
-
+          // -----------------------------
+          // LOGOUT BUTTON
+          // -----------------------------
           SizedBox(
             width: double.infinity,
             height: 55,
@@ -97,41 +124,91 @@ class SettingsView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              onPressed: () => Navigator.pushReplacementNamed(context, "/login"),
-              child: const Text("Logout", style: TextStyle(color: Colors.white, fontSize: 17)),
+              onPressed: () =>
+                  Navigator.pushReplacementNamed(context, "/login"),
+              child: const Text(
+                "Logout",
+                style: TextStyle(fontSize: 17, color: Colors.white),
+              ),
             ),
-          )
+          ),
+
+          const SizedBox(height: 40),
         ],
       ),
     );
   }
 
+  // -----------------------------
+  // SECTION TITLE
+  // -----------------------------
   Widget sectionTitle(String text, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(text, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.bold)),
+      padding: const EdgeInsets.only(bottom: 10, top: 5),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 
+  // -----------------------------
+  // CARD WRAPPER
+  // -----------------------------
+  Widget settingsCard({required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.shade100),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.05),
+          )
+        ],
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  // -----------------------------
+  // LIST ITEM
+  // -----------------------------
   Widget settingsItem({
     required IconData icon,
     required String title,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.green.shade100),
+    return ListTile(
+      leading: Icon(icon, size: 26, color: Colors.green.shade800),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.green.shade900,
+          fontSize: 16,
+        ),
       ),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.green.shade700),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade900)),
-        trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 18),
-        onTap: onTap,
-      ),
+      trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 17),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+    );
+  }
+
+  Widget divider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: Colors.green.shade100,
+      indent: 16,
+      endIndent: 16,
     );
   }
 }

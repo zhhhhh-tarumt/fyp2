@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+<<<<<<< Updated upstream
 import 'package:fyp2/View/reload_money_view.dart';
+=======
+import 'package:fyp2/View/deposit_view.dart';
+import 'package:fyp2/View/history_view.dart';
+import 'package:fyp2/View/notifications_view.dart';
+>>>>>>> Stashed changes
 
 // AUTH
 import 'View/login_view.dart';
 import 'View/register_view.dart';
 import 'View/reset_password_view.dart';
 import 'View/pin_authorize_view.dart';
+
 
 // MAIN NAVIGATION
 import 'View/navigation_view.dart';
@@ -16,8 +23,11 @@ import 'View/home_view.dart';
 // EXPENSE MODULE
 import 'View/expense_home_view.dart';
 import 'View/add_expense_view.dart';
+<<<<<<< Updated upstream
 import 'View/add_expense_shortcut_view.dart';
 import 'View/transfer_contact_view.dart';
+=======
+>>>>>>> Stashed changes
 import 'View/voice_input_view.dart';
 import 'View/voice_preview_view.dart';
 import 'View/expense_success_view.dart';
@@ -32,20 +42,25 @@ import 'View/payment_view.dart';
 
 // MONEY FEATURES
 import 'View/receive_money_view.dart';
-import 'View/expense_input_simple_view.dart';
 import 'View/merchant_scan_view.dart';
 
 // PROFILE & SETTINGS
 import 'View/settings_view.dart';
 import 'View/profile_view.dart';
 
-// NEW SETTINGS SUB-PAGES
-import 'View/notification_view.dart';
+// SETTINGS SUB-PAGES
+import 'View/alarm_view.dart';
 import 'View/language_view.dart';
 import 'View/appearance_view.dart';
 import 'View/faq_view.dart';
 import 'View/support_view.dart';
 import 'View/about_view.dart';
+
+// SUPPORT SUB-PAGES (NEW)
+import 'View/email_support_view.dart';
+import 'View/live_chat_view.dart';
+import 'View/report_problem_view.dart';
+import 'View/app_feedback_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,7 +72,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Personal Finance Tracker",
+      title: "BudgetMate",
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(
@@ -65,6 +80,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
+      // Starting Page
       initialRoute: "/login",
 
       routes: {
@@ -75,11 +91,15 @@ class MyApp extends StatelessWidget {
         "/register": (context) => RegisterView(),
         "/resetPassword": (context) => const ResetPasswordView(),
         "/pinAuthorize": (context) => const PinAuthorizeView(),
+        "/history": (context) => const HistoryView(),
+
 
         // -----------------------------------
         // MAIN NAVIGATION
         // -----------------------------------
         "/nav": (context) => const NavigationView(),
+        "/deposit": (context) => const DepositView(),
+
 
         // -----------------------------------
         // HOME + EXPENSE MODULE
@@ -87,7 +107,6 @@ class MyApp extends StatelessWidget {
         "/home": (context) => const HomeView(),
         "/expenseHome": (context) => const ExpenseHomeView(),
         "/addExpense": (context) => const AddExpenseView(),
-        "/addShortcut": (context) => const AddExpenseShortcutView(),
         "/voiceInput": (context) => const VoiceInputView(),
         "/voicePreview": (context) => const VoicePreviewView(),
         "/expenseSuccess": (context) => const ExpenseSuccessView(),
@@ -101,6 +120,7 @@ class MyApp extends StatelessWidget {
         "/aiInsight": (context) => const AIInsightView(),
         "/bnpl": (context) => const BNPLView(),
         "/payment": (context) => const PaymentView(),
+        "/alarm": (context) => const AlarmSettingsView(),
 
         // -----------------------------------
         // MONEY RELATED
@@ -111,7 +131,6 @@ class MyApp extends StatelessWidget {
         "/transferContact": (context) => const TransferContactView(),
 
         "/receive": (context) => const ReceiveMoneyView(),
-        "/quickExpense": (context) => ExpenseInputSimpleView(),
         "/merchantScan": (context) => const MerchantScanView(),
 
         // -----------------------------------
@@ -123,12 +142,20 @@ class MyApp extends StatelessWidget {
         // -----------------------------------
         // SETTINGS SUB-PAGES
         // -----------------------------------
-        "/notifications": (context) => const NotificationView(),
+        "/notifications": (context) => const NotificationsView(),
         "/language": (context) => const LanguageView(),
         "/appearance": (context) => const AppearanceView(),
         "/faq": (context) => const FAQView(),
         "/support": (context) => const SupportView(),
         "/about": (context) => const AboutView(),
+
+        // -----------------------------------
+        // SUPPORT SUB-PAGES (NEW PAGES)
+        // -----------------------------------
+        "/emailSupport": (context) => const EmailSupportView(),
+        "/liveChat": (context) => const LiveChatView(),
+        "/reportProblem": (context) => const ReportProblemView(),
+        "/feedback": (context) => const AppFeedbackView(),
       },
     );
   }
