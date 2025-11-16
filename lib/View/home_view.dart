@@ -54,11 +54,6 @@ class HomeView extends StatelessWidget {
 
                 Row(
                   children: [
-<<<<<<< Updated upstream
-                    quickAction(Icons.add, "Add", "/reloadMoney", context),
-                    quickAction(Icons.swap_horiz, "Transfer", "/transferContact", context),
-                    quickAction(Icons.qr_code, "Scan", "/merchantScan", context),
-=======
                     _walletButton(
                       icon: Icons.add_circle_outline,
                       label: "Reload",
@@ -72,7 +67,6 @@ class HomeView extends StatelessWidget {
                       color: Colors.white,
                       onTap: () => Navigator.pushNamed(context, "/history"),
                     ),
->>>>>>> Stashed changes
                   ],
                 ),
               ],
@@ -159,61 +153,6 @@ class HomeView extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-<<<<<<< Updated upstream
-          shortcutCard(
-            context,
-            title: "Transfer Money",
-            icon: Icons.swap_horiz,
-            route: "/transferContact",
-          ),
-          shortcutCard(
-            context,
-            title: "Receive Money",
-            icon: Icons.qr_code,
-            route: "/receive",
-          ),
-          shortcutCard(
-            context,
-            title: "Merchant Scan",
-            icon: Icons.qr_code_scanner,
-            route: "/merchantScan",
-          ),
-
-          const SizedBox(height: 20),
-
-          // -------------------------------------------------------
-          // Team Module Section
-          // -------------------------------------------------------
-          sectionTitle("Insights & Tools", green),
-          const SizedBox(height: 10),
-
-          shortcutCard(
-            context,
-            title: "Analytics Dashboard",
-            icon: Icons.analytics,
-            route: "/analysis",
-          ),
-
-          shortcutCard(
-            context,
-            title: "AI Financial Insights",
-            icon: Icons.lightbulb,
-            route: "/aiInsight",
-          ),
-
-          shortcutCard(
-            context,
-            title: "BNPL Tracking",
-            icon: Icons.account_balance_wallet,
-            route: "/bnpl",
-          ),
-
-          shortcutCard(
-            context,
-            title: "Make Payment",
-            icon: Icons.payments,
-            route: "/payment",
-=======
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
@@ -257,7 +196,6 @@ class HomeView extends StatelessWidget {
                 ],
               ),
             ),
->>>>>>> Stashed changes
           ),
 
           const SizedBox(height: 40),

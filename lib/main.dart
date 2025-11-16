@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-<<<<<<< Updated upstream
-import 'package:fyp2/View/reload_money_view.dart';
-=======
 import 'package:fyp2/View/deposit_view.dart';
 import 'package:fyp2/View/history_view.dart';
 import 'package:fyp2/View/notifications_view.dart';
->>>>>>> Stashed changes
 
 // AUTH
 import 'View/login_view.dart';
@@ -23,11 +19,6 @@ import 'View/home_view.dart';
 // EXPENSE MODULE
 import 'View/expense_home_view.dart';
 import 'View/add_expense_view.dart';
-<<<<<<< Updated upstream
-import 'View/add_expense_shortcut_view.dart';
-import 'View/transfer_contact_view.dart';
-=======
->>>>>>> Stashed changes
 import 'View/voice_input_view.dart';
 import 'View/voice_preview_view.dart';
 import 'View/expense_success_view.dart';
@@ -41,6 +32,7 @@ import 'View/bnpl_view.dart';
 import 'View/payment_view.dart';
 
 // MONEY FEATURES
+import 'View/transfer_contact_view.dart';
 import 'View/receive_money_view.dart';
 import 'View/merchant_scan_view.dart';
 
@@ -125,11 +117,7 @@ class MyApp extends StatelessWidget {
         // -----------------------------------
         // MONEY RELATED
         // -----------------------------------
-        "/reloadMoney": (context) => const ReloadMoneyView(),
-
-        // PAGE 1: CONTACT SELECTION
-        "/transferContact": (context) => const TransferContactView(),
-
+        "/transfer": (context) => TransferContactView(),
         "/receive": (context) => const ReceiveMoneyView(),
         "/merchantScan": (context) => const MerchantScanView(),
 
