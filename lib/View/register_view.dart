@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Controller/register_controller.dart'; // 1. Import Controller
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -9,11 +10,65 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView> {
   final phoneController = TextEditingController();
+  final emailController = TextEditingController(); // Added Email field
+  final usernameController = TextEditingController(); // Added Username field
   final passwordController = TextEditingController();
+  
   bool isPasswordVisible = false;
+  bool isLoading = false; // To show loading indicator
+
+  final RegisterController _controller = RegisterController(); // 2. Instantiate Controller
 
   bool isPhoneValid(String input) {
     return RegExp(r'^[0-9]{9,12}$').hasMatch(input);
+  }
+
+  // 3. Create Registration Function
+  void handleRegistration() async {
+    String phone = phoneController.text.trim();
+    String email = emailController.text.trim();
+    String username = usernameController.text.trim();
+    String password = passwordController.text.trim();
+
+    // Basic Validation
+    if (phone.isEmpty || email.isEmpty || username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields.")),
+      );
+      return;
+    }
+
+    if (!isPhoneValid(phone)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid phone number.")),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    // Call Controller
+    String result = await _controller.registerUser(username, email, phone, password);
+
+    setState(() => isLoading = false);
+
+    if (result == "Success") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Account Created Successfully!")),
+      );
+      
+      // Navigate to PIN setup or Login
+      Navigator.pushNamed(
+        context,
+        "/pinAuthorize",
+        arguments: "phone", // You might want to pass userId here later
+      );
+    } else {
+      // Show Error from Controller (e.g., "User already exists")
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -38,7 +93,7 @@ class _RegisterViewState extends State<RegisterView> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(height: 90),   // SHIFT CONTENT DOWN
+                        const SizedBox(height: 60), // Reduced top spacing slightly
 
                         // TITLE
                         Align(
@@ -63,12 +118,30 @@ class _RegisterViewState extends State<RegisterView> {
                           ),
                         ),
 
-                        const SizedBox(height: 55),
+                        const SizedBox(height: 40),
+
+                        // USERNAME INPUT (Added)
+                        _roundedInput(
+                          controller: usernameController,
+                          hint: "Full Name",
+                          icon: Icons.person_outline,
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // EMAIL INPUT (Added - Required for Firebase Auth)
+                        _roundedInput(
+                          controller: emailController,
+                          hint: "Email Address",
+                          icon: Icons.email_outlined,
+                        ),
+
+                        const SizedBox(height: 20),
 
                         // PHONE INPUT
                         _roundedInput(
                           controller: phoneController,
-                          hint: "Enter your phone number",
+                          hint: "Phone Number",
                           icon: Icons.phone_android_outlined,
                         ),
 
@@ -77,14 +150,14 @@ class _RegisterViewState extends State<RegisterView> {
                         // PASSWORD INPUT
                         _roundedInput(
                           controller: passwordController,
-                          hint: "Enter your password",
+                          hint: "Password",
                           icon: Icons.lock_outline,
                           isPassword: true,
                         ),
 
                         const SizedBox(height: 40),
 
-                        // CREATE ACCOUNT BUTTON (WHITE TEXT)
+                        // CREATE ACCOUNT BUTTON
                         SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -96,37 +169,21 @@ class _RegisterViewState extends State<RegisterView> {
                               ),
                               padding: EdgeInsets.zero,
                             ),
-                            onPressed: () {
-                              String input = phoneController.text.trim();
-
-                              if (!isPhoneValid(input)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text("Please enter a valid phone number."),
+                            onPressed: isLoading ? null : handleRegistration, // Disable if loading
+                            child: isLoading 
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text(
+                                  "Create Your Account",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
                                   ),
-                                );
-                                return;
-                              }
-
-                              Navigator.pushNamed(
-                                context,
-                                "/pinAuthorize",
-                                arguments: "phone",
-                              );
-                            },
-                            child: const Text(
-                              "Create Your Account",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white, // FIXED
-                              ),
-                            ),
+                                ),
                           ),
                         ),
 
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 30),
 
                         // DIVIDER
                         Row(
@@ -142,7 +199,7 @@ class _RegisterViewState extends State<RegisterView> {
                           ],
                         ),
 
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 20),
 
                         // SOCIAL ICONS
                         Row(
@@ -156,7 +213,7 @@ class _RegisterViewState extends State<RegisterView> {
                           ],
                         ),
 
-                        const SizedBox(height: 45),
+                        const SizedBox(height: 30),
 
                         // SIGN IN LINK
                         GestureDetector(
@@ -179,7 +236,7 @@ class _RegisterViewState extends State<RegisterView> {
                           ),
                         ),
 
-                        const SizedBox(height: 50),
+                        const SizedBox(height: 30),
                       ],
                     ),
                   ),

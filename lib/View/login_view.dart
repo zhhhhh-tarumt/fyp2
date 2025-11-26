@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Controller/auth_controller.dart'; // 1. Import the controller
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -8,19 +9,46 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  final phoneController = TextEditingController();
+  // 2. Changed from phone to email to match Firebase Auth
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  final AuthController _controller = AuthController(); // 3. Instantiate Controller
 
   bool isPasswordVisible = false;
   bool isLoading = false;
 
-  void doLogin() {
+  // 4. Create the actual Login function
+  void handleLogin() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
 
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() => isLoading = false);
+    // Call the controller
+    String status = await _controller.login(email, password);
+
+    setState(() => isLoading = false);
+
+    if (status == "Success") {
+      // Login Successful
       Navigator.pushReplacementNamed(context, "/nav");
-    });
+    } else {
+      // Login Failed
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(status), // Shows the actual error from Firebase
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -46,9 +74,6 @@ class _LoginViewState extends State<LoginView> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
 
-                        // ==================================================
-                        // TOP SPACING → Makes UI move downward
-                        // ==================================================
                         const SizedBox(height: 80),
 
                         // TITLE
@@ -82,10 +107,12 @@ class _LoginViewState extends State<LoginView> {
                         // ==================================================
                         // INPUT FIELDS
                         // ==================================================
+                        
+                        // CHANGED: Phone -> Email
                         _inputField(
-                          controller: phoneController,
-                          hint: "Enter your phone number",
-                          icon: Icons.phone_android_outlined,
+                          controller: emailController,
+                          hint: "Enter your email",
+                          icon: Icons.email_outlined, 
                         ),
 
                         const SizedBox(height: 20),
@@ -122,7 +149,8 @@ class _LoginViewState extends State<LoginView> {
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: isLoading ? null : doLogin,
+                            // 5. Connect button to handleLogin
+                            onPressed: isLoading ? null : handleLogin,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: green,
                               shape: RoundedRectangleBorder(

@@ -3,6 +3,9 @@ import 'package:fyp2/View/deposit_view.dart';
 import 'package:fyp2/View/history_view.dart';
 import 'package:fyp2/View/notifications_view.dart';
 
+import 'package:firebase_core/firebase_core.dart'; // Import this
+import 'firebase_options.dart';
+
 // AUTH
 import 'View/login_view.dart';
 import 'View/register_view.dart';
@@ -15,6 +18,7 @@ import 'View/navigation_view.dart';
 
 // HOME PAGE (Dashboard)
 import 'View/home_view.dart';
+
 
 // EXPENSE MODULE
 import 'View/expense_home_view.dart';
@@ -54,9 +58,19 @@ import 'View/live_chat_view.dart';
 import 'View/report_problem_view.dart';
 import 'View/app_feedback_view.dart';
 
-void main() {
+
+
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
