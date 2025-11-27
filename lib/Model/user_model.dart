@@ -1,9 +1,9 @@
 class UserModel {
-  final String userId;
+  final String userId;      
   final String username;
   final String email;
   final String phoneNumber;
-  final String password; // In real apps, store hash only
+  final String password;      
   final double walletBalance;
 
   UserModel({
@@ -17,22 +17,23 @@ class UserModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'username': username,
-      'email': email,
-      'phoneNumber': phoneNumber,
-      'password': password,
-      'walletBalance': walletBalance,
+      "userId": userId,  
+      "username": username,
+      "email": email,
+      "phoneNumber": phoneNumber,
+      "password": password,
+      "walletBalance": walletBalance,
     };
   }
 
-  factory UserModel.fromMap(Map<String, dynamic> data, String id) {
+  factory UserModel.fromMap(Map<String, dynamic> data, String uid) {
     return UserModel(
-      userId: id,
-      username: data['username'] ?? '',
-      email: data['email'] ?? '',
-      phoneNumber: data['phoneNumber'] ?? '',
-      password: data['password'] ?? '',
-      walletBalance: (data['walletBalance'] ?? 0).toDouble(),
+      userId: uid,
+      username: data["username"] ?? "",
+      email: data["email"] ?? "",
+      phoneNumber: data["phoneNumber"] ?? "",
+      password: data["password"] ?? "",
+      walletBalance: (data["walletBalance"] ?? 0).toDouble(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Controller/deposit_controller.dart';
 
 class DepositView extends StatefulWidget {
   const DepositView({super.key});
@@ -10,6 +11,8 @@ class DepositView extends StatefulWidget {
 class _DepositViewState extends State<DepositView> {
   final amountCtrl = TextEditingController();
   String selectedMethod = "Online Banking";
+
+  final DepositController depositController = DepositController();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +28,7 @@ class _DepositViewState extends State<DepositView> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // AMOUNT
+          // ---------------- AMOUNT CARD ----------------
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -67,7 +70,7 @@ class _DepositViewState extends State<DepositView> {
 
           const SizedBox(height: 25),
 
-          // PAYMENT METHOD
+          // ---------------- PAYMENT METHOD TITLE ----------------
           Text(
             "Select Payment Method",
             style: TextStyle(
@@ -79,6 +82,7 @@ class _DepositViewState extends State<DepositView> {
 
           const SizedBox(height: 12),
 
+          // ---------------- PAYMENT METHODS ----------------
           _methodTile("Online Banking"),
           _methodTile("Debit / Credit Card"),
           _methodTile("Touch ‘n Go Wallet"),
@@ -86,6 +90,7 @@ class _DepositViewState extends State<DepositView> {
 
           const SizedBox(height: 40),
 
+          // ---------------- DEPOSIT BUTTON ----------------
           SizedBox(
             height: 55,
             child: ElevatedButton(
@@ -95,10 +100,31 @@ class _DepositViewState extends State<DepositView> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Deposit successful! (demo)")),
+              onPressed: () async {
+                if (amountCtrl.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Enter amount first")),
+                  );
+                  return;
+                }
+
+                double amount = double.tryParse(amountCtrl.text) ?? 0;
+
+                String status = await depositController.depositMoney(
+                  amount,
+                  selectedMethod,
                 );
+
+                if (status == "success") {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Deposit Successful!")),
+                  );
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(status)),
+                  );
+                }
               },
               child: const Text(
                 "Deposit Now",
@@ -111,8 +137,10 @@ class _DepositViewState extends State<DepositView> {
     );
   }
 
+  // ---------------- METHOD TILE UI ----------------
   Widget _methodTile(String method) {
     final selected = selectedMethod == method;
+
     return GestureDetector(
       onTap: () => setState(() => selectedMethod = method),
       child: Container(
@@ -128,10 +156,8 @@ class _DepositViewState extends State<DepositView> {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.account_balance,
-              color: selected ? Colors.green : Colors.grey,
-            ),
+            Icon(Icons.account_balance,
+                color: selected ? Colors.green : Colors.grey),
             const SizedBox(width: 14),
             Text(
               method,

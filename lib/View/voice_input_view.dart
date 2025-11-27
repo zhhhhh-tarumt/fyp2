@@ -1,14 +1,21 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../Controller/voice_input_controller.dart';
+import '../Model/expense_voice_model.dart';
 
-class VoiceInputView extends StatelessWidget {
+class VoiceInputView extends StatefulWidget {
   const VoiceInputView({super.key});
+
+  @override
+  State<VoiceInputView> createState() => _VoiceInputViewState();
+}
+
+class _VoiceInputViewState extends State<VoiceInputView> {
+  final VoiceInputController controller = VoiceInputController();
+  bool isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
     final green = Colors.green.shade900;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -23,124 +30,81 @@ class VoiceInputView extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // ======================================================
-              // FUTURISTIC GLOW MIC BUTTON
-              // ======================================================
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer glow
-                  Container(
-                    height: screenWidth * 0.55,
-                    width: screenWidth * 0.55,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          Colors.green.shade300.withOpacity(0.35),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Middle soft blur ring
-                  Container(
-                    height: screenWidth * 0.45,
-                    width: screenWidth * 0.45,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.green.shade50.withOpacity(0.8),
-                      border: Border.all(
-                        color: Colors.green.shade200,
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.shade200.withOpacity(0.35),
-                          blurRadius: 25,
-                          spreadRadius: 2,
-                        )
-                      ],
-                    ),
-                  ),
-
-                  // Main mic icon
-                  Container(
-                    height: screenWidth * 0.32,
-                    width: screenWidth * 0.32,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 12,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.mic_rounded,
-                      size: screenWidth * 0.20,
-                      color: green,
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: screenHeight * 0.04),
-
-              // ======================================================
-              // TEXTS
-              // ======================================================
-              Text(
-                "Tap to Start Recording",
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: green,
-                ),
-              ),
-              const SizedBox(height: 8),
+              _micUI(green),
+              const SizedBox(height: 30),
 
               Text(
-                "Describe your expense in a single sentence.",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey.shade700,
-                ),
+                controller.isListening ? "Listening..." : "Tap to Start Recording",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: green),
+              ),
+
+              const SizedBox(height: 20),
+              Text(
+                "Describe your expense. Example:\n“Bought lunch RM12 at McDonald's”",
                 textAlign: TextAlign.center,
               ),
 
-              SizedBox(height: screenHeight * 0.05),
-
-              // ======================================================
-              // BUTTON
-              // ======================================================
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  onPressed: () =>
-                      Navigator.pushNamed(context, "/voicePreview"),
-                  child: const Text(
-                    "Start Recording",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 40),
+              _actionButton(context)
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _micUI(Color green) {
+    return GestureDetector(
+      onTap: () async {
+        if (!controller.isListening) {
+          bool ok = await controller.startListening();
+          setState(() {});
+        } else {
+          controller.stopListening();
+          setState(() {});
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(40),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: controller.isListening ? Colors.green.shade200 : Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 14),
+          ],
+        ),
+        child: Icon(
+          Icons.mic,
+          size: 60,
+          color: green,
+        ),
+      ),
+    );
+  }
+
+  Widget _actionButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 55,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade800,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        ),
+        onPressed: () async {
+          setState(() => isProcessing = true);
+
+          controller.stopListening();
+
+          ExpenseVoiceModel result = await controller.processWithAI();
+
+          setState(() => isProcessing = false);
+
+          Navigator.pushNamed(context, "/voicePreview", arguments: result);
+        },
+        child: isProcessing
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Text("Analyze Input", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       ),
     );
   }

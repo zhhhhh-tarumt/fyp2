@@ -1,6 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../Controller/expense_controller.dart';
+import '../Controller/user_controller.dart';
+import '../Model/expense_model.dart';
+import '../Model/user_model.dart';
+
 class AddExpenseView extends StatefulWidget {
   const AddExpenseView({super.key});
 
@@ -12,14 +17,36 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   final amountCtrl = TextEditingController();
   final noteCtrl = TextEditingController();
 
-  String selectedWallet = "Wallet 1";
+  String selectedWallet = "Main Wallet";
   String selectedDate = "Today";
   String selectedCategory = "Select Category";
+
+  final ExpenseController expenseController = ExpenseController();
+  final UserController userController = UserController();
+
+  UserModel? currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUser();
+  }
+
+  Future<void> loadUser() async {
+    currentUser = await userController.fetchCurrentUser();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final green = Colors.green.shade900;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
+
+    if (currentUser == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -33,11 +60,8 @@ class _AddExpenseViewState extends State<AddExpenseView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: screenHeight * 0.01),
+            SizedBox(height: height * 0.01),
 
-            // ======================================================
-            // AMOUNT INPUT (Beautiful Modern Style)
-            // ======================================================
             Container(
               padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 20),
               decoration: BoxDecoration(
@@ -54,14 +78,11 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    "RM",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: green,
-                    ),
-                  ),
+                  Text("RM",
+                      style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: green)),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
@@ -74,10 +95,6 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                       ),
                       decoration: const InputDecoration(
                         hintText: "0.00",
-                        hintStyle: TextStyle(
-                          fontSize: 38,
-                          color: Colors.grey,
-                        ),
                         border: InputBorder.none,
                       ),
                     ),
@@ -86,11 +103,8 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               ),
             ),
 
-            SizedBox(height: screenHeight * 0.03),
+            SizedBox(height: height * 0.03),
 
-            // ======================================================
-            // SELECTION CARDS (Wallet / Date / Notes / Category)
-            // ======================================================
             _sectionTitle("Transaction Details", green),
             const SizedBox(height: 10),
 
@@ -115,8 +129,17 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               onTap: () {},
             ),
 
+            // FIXED CATEGORY SELECTION
             GestureDetector(
-              onTap: () => Navigator.pushNamed(context, "/selectCategory"),
+              onTap: () async {
+                final result = await Navigator.pushNamed(context, "/selectCategory");
+
+                if (result != null) {
+                  setState(() {
+                    selectedCategory = result.toString();
+                  });
+                }
+              },
               child: _optionCard(
                 icon: Icons.category,
                 label: "Category",
@@ -125,11 +148,8 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               ),
             ),
 
-            SizedBox(height: screenHeight * 0.15),
+            SizedBox(height: height * 0.15),
 
-            // ======================================================
-            // ADD TRANSACTION BUTTON
-            // ======================================================
             SizedBox(
               width: double.infinity,
               height: 55,
@@ -137,12 +157,9 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: green,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                      borderRadius: BorderRadius.circular(14)),
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(context, "/expenseSuccess");
-                },
+                onPressed: saveExpense,
                 child: const Text(
                   "Add Transaction",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -155,9 +172,37 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     );
   }
 
-  // ======================================================
-  // SECTION TITLE
-  // ======================================================
+  void saveExpense() async {
+    double amount = double.tryParse(amountCtrl.text) ?? 0;
+
+    if (amount <= 0 || selectedCategory == "Select Category") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please complete all fields")),
+      );
+      return;
+    }
+
+    final expense = ExpenseModel(
+      id: "",
+      amount: amount,
+      category: selectedCategory,
+      note: noteCtrl.text,
+      date: selectedDate,
+      wallet: selectedWallet,
+      uid: currentUser!.userId,
+    );
+
+    final result = await expenseController.addExpense(expense);
+
+    if (result == "success") {
+      Navigator.pushNamed(context, "/expenseSuccess");
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result)),
+      );
+    }
+  }
+
   Widget _sectionTitle(String text, Color color) {
     return Text(
       text,
@@ -169,9 +214,6 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     );
   }
 
-  // ======================================================
-  // OPTION CARD (Wallet, Date, Notes, Category)
-  // ======================================================
   Widget _optionCard({
     required IconData icon,
     required String label,
@@ -186,10 +228,9 @@ class _AddExpenseViewState extends State<AddExpenseView> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          )
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 3)),
         ],
       ),
       child: Row(
@@ -202,19 +243,12 @@ class _AddExpenseViewState extends State<AddExpenseView> {
             ),
             child: Icon(icon, color: Colors.green.shade800, size: 26),
           ),
-
           const SizedBox(width: 14),
-
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade700,
-                ),
-              ),
+              Text(label,
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
               const SizedBox(height: 3),
               Text(
                 value,
@@ -226,9 +260,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               ),
             ],
           ),
-
           const Spacer(),
-
           const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
         ],
       ),

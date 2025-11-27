@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fyp2/View/deposit_view.dart';
+import 'package:fyp2/View/expenses_list_view.dart';
 import 'package:fyp2/View/history_view.dart';
 import 'package:fyp2/View/notifications_view.dart';
 
@@ -127,6 +128,8 @@ class MyApp extends StatelessWidget {
         "/bnpl": (context) => const BNPLView(),
         "/payment": (context) => const PaymentView(),
         "/alarm": (context) => const AlarmSettingsView(),
+        "/expensesList": (context) => const ExpensesListView(),
+
 
         // -----------------------------------
         // MONEY RELATED
@@ -158,6 +161,9 @@ class MyApp extends StatelessWidget {
         "/liveChat": (context) => const LiveChatView(),
         "/reportProblem": (context) => const ReportProblemView(),
         "/feedback": (context) => const AppFeedbackView(),
+        "/voiceInput": (context) => const VoiceInputView(),
+        "/voicePreview": (context) => const VoicePreviewView(),
+
       },
     );
   }

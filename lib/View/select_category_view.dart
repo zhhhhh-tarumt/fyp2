@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
 
-class SelectCategoryView extends StatelessWidget {
+class SelectCategoryView extends StatefulWidget {
   const SelectCategoryView({super.key});
 
   @override
+  State<SelectCategoryView> createState() => _SelectCategoryViewState();
+}
+
+class _SelectCategoryViewState extends State<SelectCategoryView> {
+  String? selectedCategory;
+
+  final List<String> categories = [
+    "Food",
+    "Transport",
+    "Shopping",
+    "Bills",
+    "Entertainment",
+    "Health",
+    "Groceries",
+    "Education",
+    "Subscriptions",
+    "Others",
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> categories = [
-      {"icon": Icons.local_dining, "label": "Food"},
-      {"icon": Icons.shopping_bag, "label": "Shopping"},
-      {"icon": Icons.directions_car, "label": "Transport"},
-      {"icon": Icons.movie, "label": "Entertainment"},
-      {"icon": Icons.fitness_center, "label": "Fitness"},
-      {"icon": Icons.pets, "label": "Pets"},
-    ];
+    final green = Colors.green.shade900;
 
     return Scaffold(
       appBar: AppBar(
@@ -20,34 +33,73 @@ class SelectCategoryView extends StatelessWidget {
         centerTitle: true,
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: categories.map((item) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.pop(context, item["label"]);
-              },
-              child: Container(
-                width: 100,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.green.shade200),
-                ),
-                child: Column(
-                  children: [
-                    Icon(item["icon"], size: 40, color: Colors.green.shade700),
-                    const SizedBox(height: 10),
-                    Text(item["label"]),
-                  ],
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: categories.length,
+        itemBuilder: (_, index) {
+          final cat = categories[index];
+          final isSelected = selectedCategory == cat;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() => selectedCategory = cat);
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.green.shade50 : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected ? green : Colors.grey.shade300,
+                  width: isSelected ? 2 : 1,
                 ),
               ),
-            );
-          }).toList(),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.category,
+                    color: isSelected ? green : Colors.grey,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      cat,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? green : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  if (isSelected)
+                    Icon(Icons.check_circle, color: green)
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        child: ElevatedButton(
+          onPressed: selectedCategory == null
+              ? null
+              : () {
+                  Navigator.pop(context, selectedCategory);
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: green,
+            minimumSize: const Size(double.infinity, 55),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: const Text(
+            "Confirm",
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          ),
         ),
       ),
     );

@@ -1,82 +1,109 @@
 import 'package:flutter/material.dart';
+import '../Controller/user_controller.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final green = Colors.green.shade800;
-    final darkGreen = Colors.green.shade900;
+    final UserController userController = UserController();
+    final green = Colors.green.shade700;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
-
           // ========================================================
-          // TOP WALLET SECTION
+          // TOP WALLET BOX WITH NOTIFICATION ICON
           // ========================================================
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 55, 20, 20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.green.shade700,
-                  Colors.green.shade600,
-                  Colors.green.shade500,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Wallet Balance",
-                    style: TextStyle(color: Colors.white70, fontSize: 15)),
-                const SizedBox(height: 6),
-
-                Text(
-                  "RM 1,000.00",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+          Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 55, 20, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.green.shade700,
+                      Colors.green.shade600,
+                      Colors.green.shade500,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.circular(28),
                   ),
                 ),
-
-                const SizedBox(height: 16),
-
-                Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _walletButton(
-                      icon: Icons.add_circle_outline,
-                      label: "Reload",
-                      color: Colors.white,
-                      onTap: () => Navigator.pushNamed(context, "/deposit"),
+                    Text("Wallet Balance",
+                        style: TextStyle(color: Colors.white70, fontSize: 15)),
+                    const SizedBox(height: 6),
+
+                    // WALLET STREAM
+                    StreamBuilder<double>(
+                      stream: userController.walletBalanceStream(),
+                      builder: (context, snapshot) {
+                        double balance = snapshot.data ?? 0.0;
+                        return Text(
+                          "RM ${balance.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    _walletButton(
-                      icon: Icons.receipt_long,
-                      label: "History",
-                      color: Colors.white,
-                      onTap: () => Navigator.pushNamed(context, "/history"),
+
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        _walletButton(
+                          icon: Icons.add_circle_outline,
+                          label: "Reload",
+                          onTap: () => Navigator.pushNamed(context, "/deposit"),
+                        ),
+                        const SizedBox(width: 10),
+                        _walletButton(
+                          icon: Icons.receipt_long,
+                          label: "History",
+                          onTap: () => Navigator.pushNamed(context, "/history"),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+
+              // NOTIFICATION ICON (top right)
+              Positioned(
+                right: 20,
+                top: 60,
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, "/notifications"),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.notifications, color: Colors.white, size: 26),
+                  ),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 18),
 
           // ========================================================
-          // QUICK ACTIONS
+          // QUICK ACTIONS (with Expenses button)
           // ========================================================
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -98,7 +125,9 @@ class HomeView extends StatelessWidget {
                   _actionTop(context, Icons.swap_horiz, "Transfer", "/transfer"),
                   _actionTop(context, Icons.call_received, "Receive", "/receive"),
                   _actionTop(context, Icons.qr_code_scanner, "Scan", "/merchantScan"),
-                  _actionTop(context, Icons.notifications_none, "Notify", "/notifications"),
+
+                  // NEW EXPENSES BUTTON
+                  _actionTop(context, Icons.list_alt, "Expenses", "/expensesList"),
                 ],
               ),
             ),
@@ -107,14 +136,17 @@ class HomeView extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ========================================================
-          // SERVICES GRID
+          // SERVICES
           // ========================================================
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               "Services",
               style: TextStyle(
-                  color: darkGreen, fontSize: 19, fontWeight: FontWeight.bold),
+                color: Colors.green.shade900,
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
@@ -147,7 +179,10 @@ class HomeView extends StatelessWidget {
             child: Text(
               "My Rewards",
               style: TextStyle(
-                  color: darkGreen, fontSize: 19, fontWeight: FontWeight.bold),
+                color: Colors.green.shade900,
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
@@ -184,7 +219,7 @@ class HomeView extends StatelessWidget {
                       children: [
                         Text("RM 2 cashback earned",
                             style: TextStyle(
-                                color: darkGreen,
+                                color: Colors.green.shade900,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16)),
                         const SizedBox(height: 4),
@@ -204,13 +239,13 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  // ----------------------------------------------------
-  // WALLET BUTTON
-  // ----------------------------------------------------
+  // =====================================================
+  // WIDGET HELPERS
+  // =====================================================
+
   Widget _walletButton({
     required IconData icon,
     required String label,
-    required Color color,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -223,18 +258,15 @@ class HomeView extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: color),
+            Icon(icon, color: Colors.white),
             const SizedBox(width: 6),
-            Text(label, style: TextStyle(color: color)),
+            Text(label, style: const TextStyle(color: Colors.white)),
           ],
         ),
       ),
     );
   }
 
-  // ----------------------------------------------------
-  // QUICK ACTIONS
-  // ----------------------------------------------------
   Widget _actionTop(
       BuildContext context, IconData icon, String title, String route) {
     return GestureDetector(
@@ -263,9 +295,6 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  // ----------------------------------------------------
-  // SERVICE ITEM (WITH LINK)
-  // ----------------------------------------------------
   Widget _serviceItem(
       BuildContext context, IconData icon, String label, String route) {
     return GestureDetector(
