@@ -24,7 +24,7 @@ import 'View/home_view.dart';
 // EXPENSE MODULE
 import 'View/expense_home_view.dart';
 import 'View/add_expense_view.dart';
-import 'View/voice_input_view.dart';
+//import 'View/voice_input_view.dart';
 import 'View/voice_preview_view.dart';
 import 'View/expense_success_view.dart';
 import 'View/select_category_view.dart';
@@ -59,16 +59,14 @@ import 'View/live_chat_view.dart';
 import 'View/report_problem_view.dart';
 import 'View/app_feedback_view.dart';
 
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
+  Stripe.publishableKey = "pk_test_51SY4ZR1pqsc9EWVnRFOqJyVYFHiXNxeOohaBrTuD5gvG3SQKKqmsuURN13KaWppap6rUbTeS8FA3QZ88Np4KbyKr00552wLOMa";
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -114,7 +112,7 @@ class MyApp extends StatelessWidget {
         "/home": (context) => const HomeView(),
         "/expenseHome": (context) => const ExpenseHomeView(),
         "/addExpense": (context) => const AddExpenseView(),
-        "/voiceInput": (context) => const VoiceInputView(),
+        //"/voiceInput": (context) => const VoiceInputView(),
         "/voicePreview": (context) => const VoicePreviewView(),
         "/expenseSuccess": (context) => const ExpenseSuccessView(),
         "/selectCategory": (context) => const SelectCategoryView(),
@@ -161,8 +159,8 @@ class MyApp extends StatelessWidget {
         "/liveChat": (context) => const LiveChatView(),
         "/reportProblem": (context) => const ReportProblemView(),
         "/feedback": (context) => const AppFeedbackView(),
-        "/voiceInput": (context) => const VoiceInputView(),
-        "/voicePreview": (context) => const VoicePreviewView(),
+        //"/voiceInput": (context) => const VoiceInputView(),
+        //"/voicePreview": (context) => const VoicePreviewView(),
 
       },
     );

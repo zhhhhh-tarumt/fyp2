@@ -1,9 +1,48 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'transfer_money_view.dart';
 
-class MerchantScanView extends StatelessWidget {
+class MerchantScanView extends StatefulWidget {
   const MerchantScanView({super.key});
+
+  @override
+  State<MerchantScanView> createState() => _MerchantScanViewState();
+}
+
+class _MerchantScanViewState extends State<MerchantScanView> {
+  bool scanned = false;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> handleScan(String phoneNumber) async {
+    // Look up Firestore user
+    final userQuery = await _firestore
+        .collection("users")
+        .where("phoneNumber", isEqualTo: phoneNumber)
+        .limit(1)
+        .get();
+
+    if (userQuery.docs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid QR: No such user")));
+      return;
+    }
+
+    final user = userQuery.docs.first;
+
+    // ❗ Prevent scanning yourself
+    // (Handled inside TransferMoneyView also)
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TransferMoneyView(
+          receiverName: user["username"],
+          receiverPhoneNumber: phoneNumber,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,127 +50,40 @@ class MerchantScanView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: const Text("Merchant QR Scanner"),
-        centerTitle: true,
-        elevation: 0,
-      ),
-
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-
-            // -------------------------------------------------------
-            // TITLE + SUBTITLE
-            // -------------------------------------------------------
-            Text(
-              "Scan QR to Pay",
+      appBar: AppBar(title: const Text("Scan QR to Pay")),
+      body: Column(
+        children: [
+          const SizedBox(height: 20),
+          Text("Scan QR to Pay",
               style: TextStyle(
-                color: green,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                  fontSize: 22, fontWeight: FontWeight.bold, color: green)),
+          const SizedBox(height: 10),
+
+          Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: green, width: 3),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: MobileScanner(
+                onDetect: (capture) {
+                  if (scanned) return;
+                  scanned = true;
+
+                  final barcode = capture.barcodes.first;
+                  final value = barcode.rawValue;
+
+                  if (value != null) {
+                    handleScan(value);   // ⭐ Pass phone number to Firestore lookup
+                  }
+                },
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              "Align the QR code inside the frame",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // -------------------------------------------------------
-            // QR SCAN GLASS PANEL (Modern Style)
-            // -------------------------------------------------------
-            Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                color: Colors.white.withOpacity(0.15),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Scanner background blur
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                      child: Container(
-                        color: Colors.white.withOpacity(0.05),
-                      ),
-                    ),
-                  ),
-
-                  // ❗ SCAN FRAME BORDER
-                  Container(
-                    width: 250,
-                    height: 250,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.green.shade400,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-
-                  // ❗ QR Icon Placeholder
-                  Icon(
-                    Icons.qr_code_scanner_rounded,
-                    size: 130,
-                    color: Colors.green.shade700.withOpacity(0.7),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 35),
-
-            // -------------------------------------------------------
-            // EXTRA ACTIONS: Upload from Gallery
-            // -------------------------------------------------------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  icon: const Icon(Icons.photo_library, color: Colors.white),
-                  label: const Text(
-                    "Upload QR from Gallery",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  onPressed: () {},
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // -------------------------------------------------------
-            // FOOTNOTE
-            // -------------------------------------------------------
-            Text(
-              "Powered by BudgetMate Secure QR Technology",
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

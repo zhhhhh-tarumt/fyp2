@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import '../Controller/transfer_controller.dart';
+import 'transfer_success_view.dart';
 
 class TransferMoneyView extends StatefulWidget {
   final String receiverName;
-  final String receiverPhone;
+  final String receiverPhoneNumber;
 
   const TransferMoneyView({
     super.key,
     required this.receiverName,
-    required this.receiverPhone,
+    required this.receiverPhoneNumber,
   });
 
   @override
@@ -18,181 +20,115 @@ class _TransferMoneyViewState extends State<TransferMoneyView> {
   final amountCtrl = TextEditingController();
   final noteCtrl = TextEditingController(text: "Gift");
 
+  final TransferController controller = TransferController();
+
+  String get formattedPhone {
+    String p = widget.receiverPhoneNumber.substring(1);
+    return "+60 ${p.substring(0, 2)} ${p.substring(2)}";
+  }
+
   @override
   Widget build(BuildContext context) {
     final green = Colors.green.shade700;
-    final lightGreen = Colors.green.shade50;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-
       appBar: AppBar(
-        elevation: 0,
+        title: const Text("Transfer"),
+        centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        centerTitle: true,
-        title: const Text(
-          "Transfer",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
       ),
-
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        children: [
-          const SizedBox(height: 15),
-
-          // Receiver Box
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: lightGreen,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.green.shade200),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // receiver section
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: Colors.green.shade200,
+                    child: const Icon(Icons.person, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.receiverName,
+                          style: const TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.bold)),
+                      Text(formattedPhone),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundColor: Colors.green.shade200,
-                  child: const Icon(Icons.person, color: Colors.white),
-                ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.receiverName,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      widget.receiverPhone,
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
 
-          const SizedBox(height: 25),
+            const SizedBox(height: 25),
 
-          // Amount Label
-          const Text(
-            "Amount",
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Amount Box
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: lightGreen,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: TextField(
+            // Amount
+            TextField(
               controller: amountCtrl,
               keyboardType: TextInputType.number,
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: green,
-              ),
-              decoration: InputDecoration(
-                prefixText: "RM ",
-                prefixStyle: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: green,
-                ),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 25),
-
-          // Note Label
-          const Text(
-            "What's the transfer for?",
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Note Box
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: lightGreen,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: TextField(
-              controller: noteCtrl,
-              style: const TextStyle(fontSize: 17),
               decoration: const InputDecoration(
-                border: InputBorder.none,
+                labelText: "Amount (RM)",
+                border: OutlineInputBorder(),
               ),
             ),
-          ),
 
-          const SizedBox(height: 40),
+            const SizedBox(height: 25),
 
-          // Send Button
-          SizedBox(
-            height: 55,
-            width: double.infinity,
-            child: ElevatedButton(
+            TextField(
+              controller: noteCtrl,
+              decoration: const InputDecoration(
+                labelText: "What's the transfer for?",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                minimumSize: const Size(double.infinity, 55),
               ),
-              onPressed: () {
-                if (amountCtrl.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please enter an amount")),
-                  );
-                  return;
-                }
+              onPressed: () async {
+                double amount = double.tryParse(amountCtrl.text) ?? 0;
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Money sent successfully!"),
-                  ),
+                final result = await controller.transferMoney(
+                  amount: amount,
+                  receiverPhone: widget.receiverPhoneNumber,
+                  note: noteCtrl.text,
                 );
-              },
-              child: const Text(
-                "Send Money",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
 
-          const SizedBox(height: 30),
-        ],
+                if (result == "success") {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TransferSuccessView(
+                        receiverName: widget.receiverName,
+                        amount: amount,
+                      ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(result)),
+                  );
+                }
+              },
+              child: const Text("Send Money",
+                  style: TextStyle(color: Colors.white, fontSize: 18)),
+            )
+          ],
+        ),
       ),
     );
   }
