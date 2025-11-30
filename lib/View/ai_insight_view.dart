@@ -49,7 +49,7 @@ class _AIInsightViewState extends State<AIInsightView> {
   // ==============================================================
   Future<void> generateInitialInsight() async {
     setState(() => isLoading = true);
-    userExpenses = await expenseFetcher.getUserExpenses();
+    userExpenses = await expenseFetcher.getAllExpenses();
 
     if (userExpenses.isEmpty) {
       _addMessage("You don't have any expenses yet. Add some to get started!", false);

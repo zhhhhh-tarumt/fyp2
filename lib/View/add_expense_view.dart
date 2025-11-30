@@ -18,7 +18,10 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   final noteCtrl = TextEditingController();
 
   String selectedWallet = "Main Wallet";
-  String selectedDate = "Today";
+  
+  // 🔥 FIX 1: Store the REAL date string here
+  String selectedDate = DateTime.now().toString().split(' ')[0]; // "2023-11-30"
+  
   String selectedCategory = "Select Category";
 
   final ExpenseController expenseController = ExpenseController();
@@ -182,12 +185,19 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       return;
     }
 
+    // 🔥 FIX 2: Ensure we send a standard Date String
+    // If selectedDate is just "Today", replace it with actual date
+    String finalDate = selectedDate;
+    if (finalDate == "Today") {
+        finalDate = DateTime.now().toString().split(' ')[0];
+    }
+
     final expense = ExpenseModel(
-      id: "",
+      id: "", // Controller will generate this
       amount: amount,
       category: selectedCategory,
       note: noteCtrl.text,
-      date: selectedDate,
+      date: finalDate, // ✅ Sends "2024-11-30", not "Today"
       wallet: selectedWallet,
       uid: currentUser!.userId,
     );
@@ -195,7 +205,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     final result = await expenseController.addExpense(expense);
 
     if (result == "success") {
-      Navigator.pushNamed(context, "/expenseSuccess");
+      Navigator.pop(context); // Go back after saving
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result)),

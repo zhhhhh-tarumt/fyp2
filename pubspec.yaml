@@ -11,28 +11,31 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
+  intl: ^0.19.0
+  # AUDIO / VOICE RECORDING (COMPLETE)
+  flutter_sound: ^9.2.13
+  audio_session: ^0.1.18
+  permission_handler: ^11.3.1
 
-  # Firebase compatibility for Flutter 3.7.x
-  firebase_core: ^3.15.2
-  firebase_auth: ^5.3.3
-  cloud_firestore: ^5.4.3
-
+  # NETWORK
   flutter_stripe: ^10.0.0
   qr_flutter: ^4.1.0
   mobile_scanner: ^3.5.5
   image_picker: ^1.0.7
 
-   # HTTP for backend calls
   http: ^1.2.2
 
-  
-
-
+  # Firebase
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.3.3
+  cloud_firestore: ^5.4.3
 
   # Charts
   fl_chart: ^0.65.0
   flutter_markdown: ^0.7.7+1
+
+  cupertino_icons: ^1.0.8
+
 
 dev_dependencies:
   flutter_test:

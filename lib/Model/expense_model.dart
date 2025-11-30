@@ -1,5 +1,5 @@
 class ExpenseModel {
-  String id;
+  String id;                      // <-- not final anymore
   final double amount;
   final String category;
   final String note;
